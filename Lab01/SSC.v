@@ -18,7 +18,7 @@
 //############################################################################
 
 // `include "mul_card_num.v" //using for loop is better
-`include "sorting.v"
+// `include "sorting.v"
 // `include "sort.v" //The sorting.v is better
 // `include "sum_mod.v" // using % is better
 
@@ -56,15 +56,17 @@ integer i, j, k, z;
 wire [8:0] sum;
 reg card_valid;
 
-reg [3:0] snack_num_cut [0:7]; 
+// reg [3:0] snack_num_cut [0:7]; 
 // reg [3:0] price_cut [0:7]; 
 reg [7:0] total [0:7]; 
 reg [7:0] sorted_item [0:7]; 
 // wire [3:0] sorted_0, sorted_1, sorted_2, sorted_3;
 // wire [3:0] sorted_4, sorted_5, sorted_6, sorted_7;
-reg [11:0] budget;
+// reg [11:0] budget;
+// wire judge1, judge2, judge3, judge4, judge5, judge6, judge7, judge8;
+wire [10:0] top1, top2, top3, top4, top5, top6, top7, top8;
 reg [8:0] remain_money;
-// wire [9:0] change0, change1, change2, change3, change4, change5, change6;
+wire signed [10:0] remain_money0, remain_money1, remain_money2, remain_money3, remain_money4, remain_money5, remain_money6, remain_money7;
 
 //================================================================
 //    DESIGN
@@ -151,35 +153,29 @@ assign sum = (card_num_cut[2] + card_num_[1]) + (card_num_cut[4] + card_num_[3])
 
 // sum_mod sm0(.card_sum(sum), .card_valid(out_valid));
 always @(*) begin
-    card_valid = (sum % 10 == 0) ? 1'b1 : 1'b0;
-    // case (sum)
-    //     8'd10: card_valid = 1'b1;
-    //     8'd20: card_valid = 1'b1;
-    //     8'd30: card_valid = 1'b1;
-    //     8'd40: card_valid = 1'b1;
-    //     8'd50: card_valid = 1'b1ß
-    //     8'd60: card_valid = 1'b1;
-    //     8'd70: card_valid = 1'b1;
-    //     8'd80: card_valid = 1'b1;
-    //     8'd90: card_valid = 1'b1;
-    //     8'd100: card_valid = 1'b1;
-    //     8'd110: card_valid = 1'b1;
-    //     8'd120: card_valid = 1'b1;
-    //     8'd130: card_valid = 1'b1;
-    //     8'd140: card_valid = 1'b1;
-    //     default: card_valid = 1'b0;
-    // endcase
+    // card_valid = (sum % 10 == 0) ? 1'b1 : 1'b0;
+    case (sum)
+        8'd50: card_valid = 1'b1;
+        8'd60: card_valid = 1'b1;
+        8'd70: card_valid = 1'b1;
+        8'd80: card_valid = 1'b1;
+        8'd90: card_valid = 1'b1;
+        8'd100: card_valid = 1'b1;
+        8'd110: card_valid = 1'b1;
+        8'd120: card_valid = 1'b1;
+        default: card_valid = 1'b0;
+    endcase
 end
 assign out_valid = card_valid;
 
-assign snack_num_cut[7] = snack_num[3:0];
-assign snack_num_cut[6] = snack_num[7:4];
-assign snack_num_cut[5] = snack_num[11:8];
-assign snack_num_cut[4] = snack_num[15:12];
-assign snack_num_cut[3] = snack_num[19:16];
-assign snack_num_cut[2] = snack_num[23:20];
-assign snack_num_cut[1] = snack_num[27:24];
-assign snack_num_cut[0] = snack_num[31:28];
+// assign snack_num_cut[7] = snack_num[3:0];
+// assign snack_num_cut[6] = snack_num[7:4];
+// assign snack_num_cut[5] = snack_num[11:8];
+// assign snack_num_cut[4] = snack_num[15:12];
+// assign snack_num_cut[3] = snack_num[19:16];
+// assign snack_num_cut[2] = snack_num[23:20];
+// assign snack_num_cut[1] = snack_num[27:24];
+// assign snack_num_cut[0] = snack_num[31:28];
 
 // assign price_cut[7] = price[3:0];
 // assign price_cut[6] = price[7:4];
@@ -197,14 +193,14 @@ assign snack_num_cut[0] = snack_num[31:28];
 // end
 
 always @(*) begin
-    total[0] = snack_num_cut[0] * price[31:28];
-    total[1] = snack_num_cut[1] * price[27:24];
-    total[2] = snack_num_cut[2] * price[23:20];
-    total[3] = snack_num_cut[3] * price[19:16];
-    total[4] = snack_num_cut[4] * price[15:12];
-    total[5] = snack_num_cut[5] * price[11:8];
-    total[6] = snack_num_cut[6] * price[7:4];
-    total[7] = snack_num_cut[7] * price[3:0];
+    total[0] = snack_num[31:28] * price[31:28];
+    total[1] = snack_num[27:24] * price[27:24];
+    total[2] = snack_num[23:20] * price[23:20];
+    total[3] = snack_num[19:16] * price[19:16];
+    total[4] = snack_num[15:12] * price[15:12];
+    total[5] = snack_num[11:8] * price[11:8];
+    total[6] = snack_num[7:4] * price[7:4];
+    total[7] = snack_num[3:0] * price[3:0];
 end
 
 // genvar g;
@@ -224,35 +220,11 @@ sorting s0(
     .sorted_4(sorted_item[4]), .sorted_5(sorted_item[5]), .sorted_6(sorted_item[6]), .sorted_7(sorted_item[7])
 );
 
-// always @(*) begin 
-//     $display("++++++++++ sorted : 0: %d", sorted_item[0]);
-// end
-// always @(*) begin 
-//     $display("++++++++++ sorted : 1: %d", sorted_item[1]);
-// end
-// always @(*) begin 
-//     $display("++++++++++ sorted : 2: %d", sorted_item[2]);
-// end
-// always @(*) begin 
-//     $display("++++++++++ sorted : 3: %d", sorted_item[3]);
-// end
-// always @(*) begin 
-//     $display("++++++++++ sorted : 4: %d", sorted_item[4]);
-// end
-// always @(*) begin 
-//     $display("++++++++++ sorted : 5: %d", sorted_item[5]);
-// end
-// always @(*) begin 
-//     $display("++++++++++ sorted : 6: %d", sorted_item[6]);
-// end
-// always @(*) begin 
-//     $display("++++++++++ sorted : 7: %d", sorted_item[7]);
-// end
 
 // check if remain_money is enough to buy next product
-always @(*) begin 
-    budget = input_money; 
-end
+// always @(*) begin 
+//     budget = input_money; 
+// end
 // assign budget = input_money; 
 
 // always @(*) begin 
@@ -269,10 +241,6 @@ end
 // end
 
 // Define the range checks for each judge
-wire judge1, judge2, judge3, judge4, judge5, judge6, judge7, judge8;
-// wire [7:0] judge_group ;
-wire [10:0] top1, top2, top3, top4, top5, top6, top7, top8;
-
 assign top1 = sorted_item[0];
 assign top2 = top1 + sorted_item[1];
 assign top3 = top2 + sorted_item[2];
@@ -282,15 +250,16 @@ assign top6 = top5 + sorted_item[5];
 assign top8 = total[0] + total[1] + total[2] + total[3] + total[4] + total[5] + total[6] + total[7];
 assign top7 = top8 - sorted_item[7];
 
-assign judge1 = (budget < top1) ? 1'b1 : 1'b0;
-assign judge2 = ((budget >= top1) && (budget < top2)) ? 1'b1 : 1'b0;
-assign judge3 = ((budget >= top2) && (budget < top3)) ? 1'b1 : 1'b0;
-assign judge4 = ((budget >= top3) && (budget < top4)) ? 1'b1 : 1'b0;
-assign judge5 = ((budget >= top4) && (budget < top5)) ? 1'b1 : 1'b0;
-assign judge6 = ((budget >= top5) && (budget < top6)) ? 1'b1 : 1'b0;
-assign judge7 = ((budget >= top6) && (budget < top7)) ? 1'b1 : 1'b0;
-assign judge8 = ((budget >= top7) && (budget < top8)) ? 1'b1 : 1'b0;
-// assign judge_group = {judge1,judge2,judge3,judge4,judge5,judge6,judge7,judge8};
+// assign judge1 = (input_money < top1) ? 1'b1 : 1'b0;
+// assign judge2 = ((input_money >= top1) && (input_money < top2)) ? 1'b1 : 1'b0;
+// assign judge3 = ((input_money >= top2) && (input_money < top3)) ? 1'b1 : 1'b0;
+// assign judge4 = ((input_money >= top3) && (input_money < top4)) ? 1'b1 : 1'b0;
+// assign judge5 = ((input_money >= top4) && (input_money < top5)) ? 1'b1 : 1'b0;
+// assign judge6 = ((input_money >= top5) && (input_money < top6)) ? 1'b1 : 1'b0;
+// assign judge7 = ((input_money >= top6) && (input_money < top7)) ? 1'b1 : 1'b0;
+// assign judge8 = ((input_money >= top7) && (input_money < top8)) ? 1'b1 : 1'b0;
+
+
 // assign judge1 = (budget < sorted_item[0]) ? 1'b1 : 1'b0;
 // assign judge2 = (!judge1) && (budget < (sorted_item[0] + sorted_item[1])) ? 1'b1 : 1'b0;
 // assign judge3 = (!judge2) && (budget < (sorted_item[0] + sorted_item[1] + sorted_item[2])) ? 1'b1 : 1'b0;
@@ -300,10 +269,19 @@ assign judge8 = ((budget >= top7) && (budget < top8)) ? 1'b1 : 1'b0;
 // assign judge7 = (!judge6) && (budget < (sorted_item[0] + sorted_item[1] + sorted_item[2] + sorted_item[3] + sorted_item[4] + sorted_item[5] + sorted_item[6])) ? 1'b1 : 1'b0;
 // assign judge8 = (!judge7) && (budget < (sorted_item[0] + sorted_item[1] + sorted_item[2] + sorted_item[3] + sorted_item[4] + sorted_item[5] + sorted_item[6] + sorted_item[7])) ? 1'b1 : 1'b0;
 // assign judge_group = {judge1,judge2,judge3,judge4,judge5,judge6,judge7,judge8};
-// always@(*) $monitor("judge_gr = %b", judge_group);
+
+assign remain_money0 = input_money - top1;
+assign remain_money1 = input_money - top2;
+assign remain_money2 = input_money - top3;
+assign remain_money3 = input_money - top4;
+assign remain_money4 = input_money - top5;
+assign remain_money5 = input_money - top6;
+assign remain_money6 = input_money - top7;
+assign remain_money7 = input_money - top8;
+
 always @(*) begin 
     case (out_valid)
-        1'b0: remain_money = budget;
+        1'b0: remain_money = input_money;
         default: begin
             // case (judge_group)
             //     8'b10000000: remain_money = budget;
@@ -317,42 +295,54 @@ always @(*) begin
             //     default: remain_money = budget - sorted_item[0] - sorted_item[1] - sorted_item[2] - sorted_item[3] - sorted_item[4] - sorted_item[5] - sorted_item[6] - sorted_item[7];
             //     // default: remain_money = budget - (total[0] + total[1] + total[2] + total[3] + total[4] + total[5] + total[6] + total[7]);
             // endcase
-            if(judge1) remain_money = budget;
-            else if(judge2) remain_money = budget - top1;
-            else if(judge3) remain_money = budget - top2;
-            else if(judge4) remain_money = budget - top3;
-            else if(judge5) remain_money = budget - top4;
-            else if(judge6) remain_money = budget - top5;
-            else if(judge7) remain_money = budget - top6;
-            else if(judge8) remain_money = budget - top7;
-            else remain_money = budget - top8;
+
+            // if(judge1) remain_money = input_money;
+            // else if(judge2) remain_money = input_money - top1;
+            // else if(judge3) remain_money = input_money - top2;
+            // else if(judge4) remain_money = input_money - top3;
+            // else if(judge5) remain_money = input_money - top4;
+            // else if(judge6) remain_money = input_money - top5;
+            // else if(judge7) remain_money = input_money - top6;
+            // else if(judge8) remain_money = input_money - top7;
+            // else remain_money = input_money - top8;
+
+            if(remain_money0[10]) remain_money = input_money;
+            else if(remain_money1[10]) remain_money = remain_money0;
+            else if(remain_money2[10]) remain_money = remain_money1;
+            else if(remain_money3[10]) remain_money = remain_money2;
+            else if(remain_money4[10]) remain_money = remain_money3;
+            else if(remain_money5[10]) remain_money = remain_money4;
+            else if(remain_money6[10]) remain_money = remain_money5;
+            else if(remain_money7[10]) remain_money = remain_money6;
+            else remain_money = remain_money7;
         end
     endcase
-    // if (out_valid == 1'b0)
-    //     remain_money = budget;
-    // else begin
-    //     case (judge_group)
-    //         8'b10000000: remain_money = budget;
-    //         8'b01000000: remain_money = budget - sorted_item[0];
-    //         8'b00100000: remain_money = budget - sorted_item[0] - sorted_item[1];
-    //         8'b00010000: remain_money = budget - sorted_item[0] - sorted_item[1] - sorted_item[2];
-    //         8'b00001000: remain_money = budget - sorted_item[0] - sorted_item[1] - sorted_item[2] - sorted_item[3];
-    //         8'b00000100: remain_money = budget - sorted_item[0] - sorted_item[1] - sorted_item[2] - sorted_item[3] - sorted_item[4];
-    //         8'b00000010: remain_money = budget - sorted_item[0] - sorted_item[1] - sorted_item[2] - sorted_item[3] - sorted_item[4] - sorted_item[5];
-    //         8'b00000001: remain_money = budget - sorted_item[0] - sorted_item[1] - sorted_item[2] - sorted_item[3] - sorted_item[4] - sorted_item[5] - sorted_item[6];
-    //         default: remain_money = budget - sorted_item[0] - sorted_item[1] - sorted_item[2] - sorted_item[3] - sorted_item[4] - sorted_item[5] - sorted_item[6] - sorted_item[7];
-    //     endcase
-    // end
 end
 
+// assign change0 = (input_money >= sorted_item[0]) ? {1'd0, input_money - sorted_item[0]} : {1'd1, input_money};
+// assign change1 = (change0[9]) ? change0 : 
+//                 (change0[8:0] >= sorted_item[1]) ? {1'd0, change0[8:0] - sorted_item[1]} : {1'd1, change0[8:0]};
+// assign change2 = (change1[9]) ? change1 : 
+//                 (change1[8:0] >= sorted_item[2]) ? {1'd0, change1[8:0] - sorted_item[2]} : {1'd1, change1[8:0]};
+// assign change3 = (change2[9]) ? change2 : 
+//                 (change2[8:0] >= sorted_item[3]) ? {1'd0, change2[8:0] - sorted_item[3]} : {1'd1, change2[8:0]};
+// assign change4 = (change3[9]) ? change3 : 
+//                 (change3[8:0] >= sorted_item[4]) ? {1'd0, change3[8:0] - sorted_item[4]} : {1'd1, change3[8:0]};
+// assign change5 = (change4[9]) ? change4 : 
+//                 (change4[8:0] >= sorted_item[5]) ? {1'd0, change4[8:0] - sorted_item[5]} : {1'd1, change4[8:0]};
+// assign change6 = (change5[9]) ? change5 : 
+//                 (change5[8:0] >= sorted_item[6]) ? {1'd0, change5[8:0] - sorted_item[6]} : {1'd1, change5[8:0]};
 // assign out_change = (!out_valid) ? input_money :
 //                     (change6[9]) ? change6[8:0] :
-//                     (change6[8:0] >= t27) ? change6[8:0] - t27 : change6[8:0];
+//                     (change6[8:0] >= sorted_item[7]) ? change6[8:0] - sorted_item[7] : change6[8:0];
+
+
+
 
 // wire [31:0] cumulative_sum [0:7];
 // wire [7:0] judge;
 
-// // Calculate cumulative sums
+// // Calculate cumulative sumscd
 // assign cumulative_sum[0] = sorted_item[0];
 // genvar g;
 // generate
@@ -388,5 +378,60 @@ end
 // end
 
 assign out_change = remain_money;
+
+endmodule
+
+module sorting(
+    in_0, in_1, in_2, in_3,
+    in_4, in_5, in_6, in_7,
+    sorted_0, sorted_1, sorted_2, sorted_3,
+    sorted_4, sorted_5, sorted_6, sorted_7
+);
+
+//================================================================
+//   INPUT AND OUTPUT DECLARATION                         
+//================================================================
+input wire [7:0] in_0, in_1, in_2, in_3, in_4, in_5, in_6, in_7;
+output reg [7:0] sorted_0, sorted_1, sorted_2, sorted_3, sorted_4, sorted_5, sorted_6, sorted_7;
+
+//================================================================
+//    Wire & Registers 
+//================================================================
+reg [7:0] array [0:7];
+
+//================================================================
+//    DESIGN
+//================================================================
+always @(*) begin
+    integer i, j;
+    reg [7:0] temp;
+
+    array[0] = in_0;
+    array[1] = in_1;
+    array[2] = in_2;
+    array[3] = in_3;
+    array[4] = in_4;
+    array[5] = in_5;
+    array[6] = in_6;
+    array[7] = in_7;
+
+    for (i = 0; i < 8; i = i + 1) begin
+        for (j = i + 1; j < 8; j = j + 1) begin
+            if (array[i] < array[j]) begin
+                temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            end
+        end
+    end
+    sorted_0 = array[0];
+    sorted_1 = array[1];
+    sorted_2 = array[2];
+    sorted_3 = array[3];
+    sorted_4 = array[4];
+    sorted_5 = array[5];
+    sorted_6 = array[6];
+    sorted_7 = array[7];
+end
 
 endmodule
