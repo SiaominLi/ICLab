@@ -103,18 +103,28 @@ always @(posedge clk or negedge rst_n) begin
                             endcase
                         end
                         else current_score <= bases[2];
+
                     end
                     DOUBLE_HIT: begin //2
-                        if(outs == 2'b10)begin
-                            current_score <= bases[0] + bases[1] + bases[2];
-                        end
-                        else begin
-                            if (bases[2] || bases[1]) begin
-                                current_score <= bases[2] + bases[1];
-                            end
-                        end
+                        current_score <= (outs[1]) ? (bases[0] + bases[1] + bases[2]) : (bases[2] + bases[1]);
+
+                        // if(outs == 2'b10)begin
+                        //     current_score <= bases[0] + bases[1] + bases[2];
+                        // end
+                        // else begin
+                        //     if (bases[2] || bases[1]) begin
+                        //         current_score <= bases[2] + bases[1];
+                        //     end
+                        // end
                     end
                     TRIPLE_HIT: begin //3
+                        // case(bases)
+                        //     3'b111: current_score <= 3'b011;
+                        //     3'b000: current_score <= 3'b000;
+                        //     3'b110, 3'b101, 3'b011: current_score <= 3'b010;
+                        //     // 3'b100, 3'b001, 3'b010:
+                        //     default: current_score <= 3'b001;
+                        // endcase
                         current_score <= bases[0] + bases[1] + bases[2];
                     end
                     HOME_RUN: begin //4
@@ -146,6 +156,8 @@ always@(*) begin
     else if (temp_score_A > temp_score_B) result = 2'b00;
     else if (temp_score_B > temp_score_A) result = 2'b01;
     else result = 2'b10;
+    // else result = (temp_score_A > temp_score_B) ? 2'b00 :
+    //          (temp_score_B > temp_score_A) ? 2'b01 : 2'b10;
 end
 
 // Process how many prople on bases
@@ -169,12 +181,12 @@ always@(posedge clk or negedge rst_n) begin
             end
             if (in_valid) begin
                 played <= 1'd1;
-                if ({inning, half} == 3'b110) begin
-                    early_end <= temp_score_B > temp_score_A;
-                end
+                
                 if (half) temp_score_B <= temp_score;
                 else temp_score_A <= temp_score;
                 
+                if ({inning, half} == 3'b110) early_end <= temp_score_B > temp_score_A;
+
                 case (action)
                     WALK: begin //0
                         case(bases)
@@ -216,26 +228,41 @@ always@(posedge clk or negedge rst_n) begin
                         bases <= 3'b000; 
                     end 
                     BUNT: begin //5
-                        if(outs == 2'b10) begin
+                        if(outs[1]) begin
                             outs <= 2'b00;
                             bases <= 'd0;
                         end
                         else outs <= outs + 1;
                         bases <= {bases[1], bases[0], 1'b0};
+                        // bases <= bases << 1;
                     end 
                     GROUND_BALL: begin //6
-                        if (!outs && !bases[0]) begin // 0 outs & base1 
-                            outs <= 2'b01;
-                            bases <= {bases[1], 1'b0, 1'b0};
-                        end 
-                        else if ((!outs && bases[0]) || (outs == 2'b01 && !bases[0])) begin
-                            outs <= 2'b10;
-                            bases <= {bases[1], 1'b0, 1'b0};
-                        end
-                        else begin
-                            outs <= 2'b00;
-                            bases <= 'd0;
-                        end
+                        // if (!outs && !bases[0]) begin // 0 outs & base1 no people
+                        //     outs <= 2'b01;
+                        //     bases <= {bases[1], 1'b0, 1'b0};
+                        // end 
+                        // else if ((!outs && bases[0]) || (outs == 2'b01 && !bases[0])) begin
+                        //     outs <= 2'b10;
+                        //     bases <= {bases[1], 1'b0, 1'b0};
+                        // end
+                        // else begin
+                        //     outs <= 2'b00;
+                        //     bases <= 'd0;
+                        // end
+                        case ({outs, bases[0]})
+                            3'b000: begin // 0 outs, base1=0
+                                outs <= 2'b01;
+                                bases <= {bases[1], 1'b0, 1'b0};
+                            end
+                            3'b001, 3'b010: begin // 0 outs & base1=1 or 1 out & base1=0
+                                outs <= 2'b10;
+                                bases <= {bases[1], 1'b0, 1'b0};
+                            end
+                            default: begin // other situations, outs = 0, bases = 0
+                                outs <= 2'b00;
+                                bases <= 'd0;
+                            end
+                        endcase
                     end 
                     FLY_BALL: begin //7
                         if (outs < 2) begin
