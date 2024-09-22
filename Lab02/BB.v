@@ -40,8 +40,6 @@ reg [1:0] outs;
 reg [3:0] temp_score, temp_score_A;
 reg [2:0] bases; // bit 0: 1st base, bit 1: 2nd base, bit 2: 3rd base
 reg [2:0] current_score, temp_score_B;
-reg [1:0] current_inning;
-reg current_half; // Top or Bottom of the inning
 reg played, early_end;
 
 
@@ -75,7 +73,6 @@ end
 // Handle base runner movements and score calculation.
 // Update bases and score depending on the action:
 // Example: Walk, Hits (1H, 2H, 3H), Home Runs, etc.
-
 
 always @(*) begin
     temp_score = ( (half) ? {1'b0, temp_score_B} : temp_score_A ) + ( (early_end && half) ? 'd0 : {1'd0, current_score} );
@@ -145,19 +142,6 @@ always @(posedge clk or negedge rst_n) begin
             end  
         end
     end
-end
-
-always@(*) begin
-    out_valid = current_state;
-    score_A = {4'b0, temp_score_A};
-    score_B = {5'b0, temp_score_B};
-
-    if (!out_valid) result = 2'b00;
-    else if (temp_score_A > temp_score_B) result = 2'b00;
-    else if (temp_score_B > temp_score_A) result = 2'b01;
-    else result = 2'b10;
-    // else result = (temp_score_A > temp_score_B) ? 2'b00 :
-    //          (temp_score_B > temp_score_A) ? 2'b01 : 2'b10;
 end
 
 // Process how many prople on bases
@@ -288,6 +272,17 @@ end
 //                Output Block                  //
 //==============================================//
 // Decide when to set out_valid high, and output score_A, score_B, and result.
+always@(*) begin
+    out_valid = current_state;
+    score_A = {4'b0, temp_score_A};
+    score_B = {5'b0, temp_score_B};
 
+    if (!out_valid) result = 2'b00;
+    else if (temp_score_A > temp_score_B) result = 2'b00;
+    else if (temp_score_B > temp_score_A) result = 2'b01;
+    else result = 2'b10;
+    // else result = (temp_score_A > temp_score_B) ? 2'b00 :
+    //          (temp_score_B > temp_score_A) ? 2'b01 : 2'b10;
+end
 
 endmodule
