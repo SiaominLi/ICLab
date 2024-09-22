@@ -35,7 +35,7 @@ parameter END_GAME = 1'd1;
 //==============================================//
 //                 reg declaration              //
 //==============================================//
-reg [2:0] current_state, next_state;
+reg current_state, next_state;
 reg [1:0] outs;
 reg [3:0] temp_score, temp_score_A;
 reg [2:0] bases; // bit 0: 1st base, bit 1: 2nd base, bit 2: 3rd base
