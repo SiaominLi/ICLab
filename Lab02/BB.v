@@ -28,10 +28,7 @@ parameter GROUND_BALL = 3'd6; // Ground ball
 parameter FLY_BALL   = 3'd7;  // Fly ball
 
 // FSM states
-// parameter IDLE = 3'd0;
-// parameter PLAY = 3'd1;
 parameter PLAYING = 1'd0;
-// parameter END_EARLY = 3'd2;
 parameter END_GAME = 1'd1;
 
 
@@ -40,10 +37,9 @@ parameter END_GAME = 1'd1;
 //==============================================//
 reg [2:0] current_state, next_state;
 reg [1:0] outs;
-reg flag;
-reg [3:0] temp_score;
+reg [3:0] temp_score, temp_score_A;
 reg [2:0] bases; // bit 0: 1st base, bit 1: 2nd base, bit 2: 3rd base
-reg [4:0] current_score;
+reg [2:0] current_score, temp_score_B;
 reg [1:0] current_inning;
 reg current_half; // Top or Bottom of the inning
 reg played, early_end;
@@ -82,41 +78,31 @@ end
 
 
 always @(*) begin
-    temp_score = ( (half) ? {4'd0, score_B} : {4'd0, score_A} ) + ( (early_end && half) ? 'd0 : current_score );
+    temp_score = ( (half) ? {1'b0, temp_score_B} : temp_score_A ) + ( (early_end && half) ? 'd0 : {1'd0, current_score} );
 end
 
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         current_score <= 0;
-        // out_valid <= 1'd0;
-        // result <= 'd0;
     end 
     else begin
         if (!current_state) begin
-            // out_valid <= 1'd0;
             if (in_valid) begin
                 current_score <= 3'd0;
                 case (action)
                     WALK: begin //0
-                        if (bases == 3'b111) current_score <= 4'd1;
+                        if (bases == 3'b111) current_score <= 3'd1;
+                        else;
                     end
                     SINGLE_HIT: begin //1
                         if(outs == 2'b10)begin
                             case(bases)
-                                3'b100, 3'b101, 3'b010, 3'b011:  begin
-                                    current_score <= 4'd1;
-                                end
-                                3'b111, 3'b110: begin
-                                    current_score <= 2;
-                                end
+                                3'b100, 3'b101, 3'b010, 3'b011: current_score <= 3'd1;
+                                3'b111, 3'b110: current_score <= 2;
                                 default: ;
                             endcase
                         end
-                        else begin
-                            if (bases[2]) begin
-                                current_score <= 4'd1;
-                            end
-                        end
+                        else current_score <= bases[2];
                     end
                     DOUBLE_HIT: begin //2
                         if(outs == 2'b10)begin
@@ -126,7 +112,7 @@ always @(posedge clk or negedge rst_n) begin
                             if (bases[2] || bases[1]) begin
                                 current_score <= bases[2] + bases[1];
                             end
-                        end;
+                        end
                     end
                     TRIPLE_HIT: begin //3
                         current_score <= bases[0] + bases[1] + bases[2];
@@ -148,20 +134,17 @@ always @(posedge clk or negedge rst_n) begin
                 endcase
             end  
         end
-        else begin
-            // out_valid <= 1'd1;
-            // if (score_A > score_B) result <= 2'b00;
-            // else if (score_B > score_A) result <= 2'b01;
-            // else result <= 2'b10;
-        end
     end
 end
 
 always@(*) begin
     out_valid = current_state;
+    score_A = {4'b0, temp_score_A};
+    score_B = {5'b0, temp_score_B};
+
     if (!out_valid) result = 2'b00;
-    else if (score_A > score_B) result = 2'b00;
-    else if (score_B > score_A) result = 2'b01;
+    else if (temp_score_A > temp_score_B) result = 2'b00;
+    else if (temp_score_B > temp_score_A) result = 2'b01;
     else result = 2'b10;
 end
 
@@ -172,24 +155,25 @@ always@(posedge clk or negedge rst_n) begin
         outs <= 0;
         played <= 1'd0;
         early_end <= 1'd0;
-        score_A <= 'd0;
-        score_B <= 'd0;
+        // temp_score <= 4'd0;
+        temp_score_A <= 4'd0;
+        temp_score_B <= 3'd0;
+        // score_A <= 8'd0;
+        // score_B <= 8'd0;
     end 
     else begin
         if (!current_state) begin
-            // out_valid <= 1'd0;
-
             if (!played) begin
-                score_A <= 8'd0;
-                score_B <= 8'd0;
+                temp_score_A <= 'd0;
+                temp_score_B <= 'd0;
             end
             if (in_valid) begin
                 played <= 1'd1;
                 if ({inning, half} == 3'b110) begin
-                    early_end <= score_B > score_A;
+                    early_end <= temp_score_B > temp_score_A;
                 end
-                if (half) score_B <= temp_score;
-                else score_A <= temp_score;
+                if (half) temp_score_B <= temp_score;
+                else temp_score_A <= temp_score;
                 
                 case (action)
                     WALK: begin //0
