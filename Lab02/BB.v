@@ -41,7 +41,7 @@ parameter END_GAME = 1'd1;
 reg [2:0] current_state, next_state;
 reg [1:0] outs;
 reg flag;
-reg [7:0] score_t2, score_t3, score_t;
+reg [3:0] temp_score;
 reg [2:0] bases; // bit 0: 1st base, bit 1: 2nd base, bit 2: 3rd base
 reg [4:0] current_score;
 reg [1:0] current_inning;
@@ -82,18 +82,18 @@ end
 
 
 always @(*) begin
-    score_t3 = ( (half) ? score_B : score_A ) + ( (early_end && half) ? 'd0 : current_score );
+    temp_score = ( (half) ? {4'd0, score_B} : {4'd0, score_A} ) + ( (early_end && half) ? 'd0 : current_score );
 end
 
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         current_score <= 0;
-        out_valid <= 1'd0;
-        result <= 'd0;
+        // out_valid <= 1'd0;
+        // result <= 'd0;
     end 
     else begin
         if (!current_state) begin
-            out_valid <= 1'd0;
+            // out_valid <= 1'd0;
             if (in_valid) begin
                 current_score <= 3'd0;
                 case (action)
@@ -149,14 +149,21 @@ always @(posedge clk or negedge rst_n) begin
             end  
         end
         else begin
-            out_valid <= 1'd1;
-            if (score_A > score_B) result <= 2'b00;
-            else if (score_B > score_A) result <= 2'b01;
-            else result <= 2'b10;
+            // out_valid <= 1'd1;
+            // if (score_A > score_B) result <= 2'b00;
+            // else if (score_B > score_A) result <= 2'b01;
+            // else result <= 2'b10;
         end
     end
 end
 
+always@(*) begin
+    out_valid = current_state;
+    if (!out_valid) result = 2'b00;
+    else if (score_A > score_B) result = 2'b00;
+    else if (score_B > score_A) result = 2'b01;
+    else result = 2'b10;
+end
 
 // Process how many prople on bases
 always@(posedge clk or negedge rst_n) begin
@@ -181,8 +188,8 @@ always@(posedge clk or negedge rst_n) begin
                 if ({inning, half} == 3'b110) begin
                     early_end <= score_B > score_A;
                 end
-                if (half) score_B <= score_t3;
-                else score_A <= score_t3;
+                if (half) score_B <= temp_score;
+                else score_A <= temp_score;
                 
                 case (action)
                     WALK: begin //0
