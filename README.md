@@ -4,18 +4,18 @@
 
 ---
 
-| Lecture   | Topic                                                           |Design
-|-----------|-----------------------------------------------------------------|--------------------
-| Lecture01 |  Snack Shopping Calculator (Combinational Circuit Programming)  | SSC.v
-| Lecture02 |  Three-Inning Baseball Game (Sequential Circuit Programming)    | BB.v
-| Lecture03 |                                                                 |
-| Lecture04 |                                                                 |
-| Lecture05 |        |
-| Lecture06 |           |
-| Lecture07 |     |
-| Lecture08 |                                |
-| Lecture09 |                              |
-| Lecture10 |                         |
-| Lecture11 |                             |
-| Lecture12 |                              |
-| Lecture13 |                                    |
+| Lecture| Topic                                                           |Design
+|--------|-----------------------------------------------------------------|--------------------
+| Lab01  |  Snack Shopping Calculator (Combinational Circuit Programming)  | SSC.v
+| Lab02  |  Three-Inning Baseball Game (Sequential Circuit Programming)    | BB.v
+| Lab03  |        |                                                        |
+| Lab04  |        |                                                        |
+| Lab05  |        |                                                        |
+| Lab06  |        |                                                        |
+| Lab07  |        |                                                        |
+| Lab08  |        |                                                        |
+| Lab09  |        |                                                        |
+| Lab10  |        |                                                        |
+| Lab11  |        |                                                        |
+| Lab12  |        |                                                        |
+| Lab13  |        |                                                        |
