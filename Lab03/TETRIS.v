@@ -208,16 +208,11 @@ always @(posedge clk or negedge rst_n) begin
 						end
 					end
 					3'b100: begin
-						// max1 = ((row_record[position+2]) > row_record[position+1]) ? 
-						// 	row_record[position+2] : row_record[position+1];
-
-						// max_value = (max1 > (row_record[position]+1)) ? (max1+1) : (row_record[position]+2);
-						// $display("maxV: %d max2 %d position %d",max_value, max2, position);
 						row_record[position] <= max_value; 
 						row_record[position+1] <= max_value; 
 						row_record[position+2] <= max_value; 
 					end
-					3'b101: begin
+					3'b101: begins
 						if(row_record[position] > row_record[position+1]) begin
 							row_record[position] <= row_record[position] + 3 ; 
 							row_record[position+1] <= row_record[position] + 1 ; 
