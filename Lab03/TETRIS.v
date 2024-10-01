@@ -179,17 +179,6 @@ always @(posedge clk or negedge rst_n) begin
 						else row_record[position] <= row_record[position] + 4;
 					end
 					3'b010: begin
-						// max1 <= (row_record[position] > row_record[position+1]) ? 
-						// 	row_record[position] : row_record[position+1];
-
-						// max2 <= (row_record[position+2] > row_record[position+3]) ? 
-						// 	row_record[position+2] : row_record[position+3];
-
-						// max_value <= (max1 > max2) ? (max1 + 1) : (max2 + 1);
-						// $display("max value: %d time %d ",max_value, $time);
-						// $display("max1: %d max2 %d position %d",max1, max2, position);
-						// $display("row_record: %d %d %d %d %d %d ",row_record[0], row_record[1], row_record[2], row_record[3], row_record[4], row_record[5]);
-
 						row_record[position] <= max_value; 
 						row_record[position+1] <= max_value; 
 						row_record[position+2] <= max_value; 
