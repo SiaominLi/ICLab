@@ -49,19 +49,20 @@ parameter OUTPUT_SCORE = 2'd11;
 //---------------------------------------------------------------------
 //   REG & WIRE DECLARATION
 //---------------------------------------------------------------------
+reg [3:0] tetro_index, next_tetro_index;
+
 reg [90:0] map;
-reg [3:0] row_record [0:5]; //Store MAX position
+reg [3:0] row_record [0:5], next_row_record[0:5]; //Store MAX position
 reg [3:0] max1, max2, max_value;
 reg [2:0] curr_pos, curr_tetrom, temp_score;
 reg [11:0] row_score;
-reg [4:0] tetris_cnt;
+
 reg [4:0] total_score; 
 reg [3:0] one_flag;
 reg [2:0] one_state;
 reg [2:0] shift_state [0:2];
 reg [2:0] shift_all [0:14];
 
-// reg [11:0]row_record_0, row_record_1, row_record_2, row_record_3, row_record_4, row_record_5;
 reg [11:0] map_col0, map_col1, map_col2, map_col3, map_col4, map_col5;
 reg [3:0] row_max_0,row_max_1,row_max_2,row_max_3,row_max_4,row_max_5;
 
@@ -94,22 +95,29 @@ end
 //---------------------------------------------------------------------
 //   DESIGN
 //---------------------------------------------------------------------
+
+//------------------------Control tetro_index------------------------
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
-		tetris_cnt <= 4'b0;
+		tetro_index <= 4'b0;
     end
 	else begin
-		if (in_valid) begin
-			tetris_cnt <= tetris_cnt + 1;
+		if (tetris_valid) begin
+			tetro_index <= 4'b0;
 		end
-		else begin
-			if(tetris_valid) begin
-				tetris_cnt <= 4'b0;
-			end
-		end
+		else tetro_index <= next_tetro_index;
 	end
 end
 
+always @(*) begin
+	next_tetro_index = tetro_index;
+	if (score_valid) begin
+		next_tetro_index = tetro_index + 1;
+	end
+end
+//-------------------------------------------------------------------
+
+//------------------------Calcelate max value------------------------
 always @(*) begin
 	case(tetrominoes)
 		3'b010: begin
@@ -122,17 +130,14 @@ always @(*) begin
 			max_value = (max1 > max2) ? (max1 + 1) : (max2 + 1);
 		end
 		3'b100: begin
-			// $display("row_record: %d %d %d %d %d %d @ %d",row_record[0], row_record[1], row_record[2], row_record[3], row_record[4], row_record[5], $time);
-
 			max1 = ((row_record[position+2]) > row_record[position+1]) ? 
-			row_record[position+2] : row_record[position+1];
+				row_record[position+2] : row_record[position+1];
 			max2 = 0;
-
 			max_value = (max1 > (row_record[position]+1)) ? (max1+1) : (row_record[position]+2);
 		end
 		3'b111: begin
 			max1 = ((row_record[position]) > row_record[position+1]) ? 
-			row_record[position] : row_record[position+1];
+				row_record[position] : row_record[position+1];
 			max2 = 0;
 			max_value = 0;
 		end
@@ -143,136 +148,122 @@ always @(*) begin
 		end
 	endcase
 end
+//-------------------------------------------------------------------
+
+//------------------------Control row_record-------------------------
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
 		for (i = 0; i < 6; i = i + 1) begin
-            row_record[i] <= 4'b0;
-        end
-    end
-	else if( tetris_valid ) begin
+			row_record[i] <= 4'b0;
+		end
+	end
+	else if (tetris_valid) begin
 		for (i = 0; i < 6; i = i + 1) begin
 			row_record[i] <= 4'b0;
 		end
 	end
 	else begin
-		if (current_state == UPDATE_ROW_RECORD) begin
-			if (in_valid) begin
-				// max1 <= 4'b0;
-				// max2 <= 4'b0;
-				// max_value <= 4'b0;
-				curr_tetrom <= tetrominoes;
-				curr_pos <= position;
-				case(tetrominoes)
-					3'b000: begin
-						if(row_record[position] > row_record[position+1]) begin
-							row_record[position] <= row_record[position] + 2 ; 
-							row_record[position+1] <= row_record[position] + 2 ; 
-						end
-						else begin
-							row_record[position] <= row_record[position+1] + 2 ; 
-							row_record[position+1] <= row_record[position+1] + 2 ; 
-						end
-					end
-					3'b001: begin
-						// row_record[position] <= row_record[position]>11? 4'd15:row_record[position] + 4;
-						if( row_record[position] > 11 ) row_record[position] <= 4'd15;
-						else row_record[position] <= row_record[position] + 4;
-					end
-					3'b010: begin
-						// max1 <= (row_record[position] > row_record[position+1]) ? 
-						// 	row_record[position] : row_record[position+1];
-
-						// max2 <= (row_record[position+2] > row_record[position+3]) ? 
-						// 	row_record[position+2] : row_record[position+3];
-
-						// max_value <= (max1 > max2) ? (max1 + 1) : (max2 + 1);
-						// $display("max value: %d time %d ",max_value, $time);
-						// $display("max1: %d max2 %d position %d",max1, max2, position);
-						// $display("row_record: %d %d %d %d %d %d ",row_record[0], row_record[1], row_record[2], row_record[3], row_record[4], row_record[5]);
-
-						row_record[position] <= max_value; 
-						row_record[position+1] <= max_value; 
-						row_record[position+2] <= max_value; 
-						row_record[position+3] <= max_value; 
-					end
-					3'b011: begin
-						if( row_record[position] > (row_record[position+1] + 2) ) begin
-							row_record[position] <= row_record[position] + 1 ; 
-							row_record[position+1] <= row_record[position] + 1 ; 
-
-						end
-						else begin
-							row_record[position] <= row_record[position+1] + 3 ; 
-							row_record[position+1] <= row_record[position+1] + 3 ; 
-
-						end
-					end
-					3'b100: begin
-						// max1 = ((row_record[position+2]) > row_record[position+1]) ? 
-						// 	row_record[position+2] : row_record[position+1];
-
-						// max_value = (max1 > (row_record[position]+1)) ? (max1+1) : (row_record[position]+2);
-						// $display("maxV: %d max2 %d position %d",max_value, max2, position);
-						row_record[position] <= max_value; 
-						row_record[position+1] <= max_value; 
-						row_record[position+2] <= max_value; 
-					end
-					3'b101: begin
-						if(row_record[position] > row_record[position+1]) begin
-							row_record[position] <= row_record[position] + 3 ; 
-							row_record[position+1] <= row_record[position] + 1 ; 
-						end
-						else begin
-							row_record[position] <= row_record[position+1] + 3 ; 
-							row_record[position+1] <= row_record[position+1] + 1 ; 
-						end
-					end
-					3'b110: begin
-						if( row_record[position] > (row_record[position+1]+1) ) begin
-							row_record[position] <= row_record[position] + 2 ; 
-							row_record[position+1] <= row_record[position] + 1 ; 
-						end
-						else begin
-							row_record[position] <= row_record[position+1] + 3 ; 
-							row_record[position+1] <= row_record[position+1] + 2 ; 
-						end
-					end
-					3'b111: begin
-						// max1 = ((row_record[position]) > row_record[position+1]) ? 
-						// 	row_record[position] : row_record[position+1];
-
-						if(max1 >= row_record[position+2]) begin
-							row_record[position] <= max1 + 1; 
-							row_record[position+1] <= max1 + 2; 
-							row_record[position+2] <= max1 + 2; 
-						end
-						else begin
-							row_record[position] <= row_record[position+2]; 
-							row_record[position+1] <= row_record[position+2] + 1; 
-							row_record[position+2] <= row_record[position+2] + 1; 
-						end
-					end
-
-				endcase
-			end
+		if (current_state == UPDATE_ROW_RECORD && in_valid) begin
+			curr_tetrom <= tetrominoes;
+			curr_pos <= position;
+			row_record[0] <= next_row_record[0];
+			row_record[1] <= next_row_record[1];
+			row_record[2] <= next_row_record[2];
+			row_record[3] <= next_row_record[3];
+			row_record[4] <= next_row_record[4];
+			row_record[5] <= next_row_record[5];
 		end
-		else if(current_state == OUTPUT_SCORE && ~((|map[90:72] == 1) || tetris_cnt == 'd16) ) begin
-			row_record[0] <= row_max_0;
-			row_record[1] <= row_max_1;
-			row_record[2] <= row_max_2;
-			row_record[3] <= row_max_3;
-			row_record[4] <= row_max_4;
-			row_record[5] <= row_max_5;
-		end
-		else begin
-			if( tetris_valid ) begin
-				for (i = 0; i < 6; i = i + 1) begin
-					row_record[i] <= 4'b0;
-				end
+		else if(current_state == OUTPUT_SCORE) begin
+			if( ~((|map[90:72] == 1) || tetro_index == 'd15) ) begin
+				row_record[0] <= row_max_0;
+				row_record[1] <= row_max_1;
+				row_record[2] <= row_max_2;
+				row_record[3] <= row_max_3;
+				row_record[4] <= row_max_4;
+				row_record[5] <= row_max_5;
 			end
 		end
 	end
 end
+
+always @(*) begin
+	for (i = 0; i < 6; i = i + 1) begin
+		next_row_record[i] = row_record[i];
+	end
+	if (current_state == UPDATE_ROW_RECORD && in_valid) begin
+		case (tetrominoes)
+			3'b000: begin
+				if (row_record[position] > row_record[position + 1]) begin
+					next_row_record[position] = row_record[position] + 2;
+					next_row_record[position + 1] = row_record[position] + 2;
+				end
+				else begin
+					next_row_record[position] = row_record[position + 1] + 2;
+					next_row_record[position + 1] = row_record[position + 1] + 2;
+				end
+			end
+			3'b001: begin
+				next_row_record[position] = (row_record[position] > 11) ? 4'd15 : row_record[position] + 4;
+			end
+			3'b010: begin
+				next_row_record[position] = max_value;
+				next_row_record[position + 1] = max_value;
+				next_row_record[position + 2] = max_value;
+				next_row_record[position + 3] = max_value;
+			end
+			3'b011: begin
+				if( row_record[position] > (row_record[position+1] + 2) ) begin
+					next_row_record[position] = row_record[position] + 1 ; 
+					next_row_record[position+1] = row_record[position] + 1 ; 
+
+				end
+				else begin
+					next_row_record[position] = row_record[position+1] + 3 ; 
+					next_row_record[position+1] = row_record[position+1] + 3 ; 
+
+				end
+			end
+			3'b100: begin
+				next_row_record[position] = max_value; 
+				next_row_record[position+1] = max_value; 
+				next_row_record[position+2] = max_value; 
+			end
+			3'b101: begin
+				if(row_record[position] > row_record[position+1]) begin
+					next_row_record[position] = row_record[position] + 3 ; 
+					next_row_record[position+1] = row_record[position] + 1 ; 
+				end
+				else begin
+					next_row_record[position] = row_record[position+1] + 3 ; 
+					next_row_record[position+1] = row_record[position+1] + 1 ; 
+				end
+			end
+			3'b110: begin
+				if( row_record[position] > (row_record[position+1]+1) ) begin
+					next_row_record[position] = row_record[position] + 2 ; 
+					next_row_record[position+1] = row_record[position] + 1 ; 
+				end
+				else begin
+					next_row_record[position] = row_record[position+1] + 3 ; 
+					next_row_record[position+1] = row_record[position+1] + 2 ; 
+				end
+			end
+			3'b111: begin
+				if(max1 >= row_record[position+2]) begin
+					next_row_record[position] = max1 + 1; 
+					next_row_record[position+1] = max1 + 2; 
+					next_row_record[position+2] = max1 + 2; 
+				end
+				else begin
+					next_row_record[position] = row_record[position+2]; 
+					next_row_record[position+1] = row_record[position+2] + 1; 
+					next_row_record[position+2] = row_record[position+2] + 1; 
+				end
+			end
+		endcase
+	end
+end
+//-------------------------------------------------------------------
 
 find_top_row find0(.map_x(map_col0), .row_max(row_max_0));
 find_top_row find1(.map_x(map_col1), .row_max(row_max_1));
@@ -281,14 +272,6 @@ find_top_row find3(.map_x(map_col3), .row_max(row_max_3));
 find_top_row find4(.map_x(map_col4), .row_max(row_max_4));
 find_top_row find5(.map_x(map_col5), .row_max(row_max_5));
 
-
-// always @(*)begin
-// 	row_record_1 = row_record[1];
-// 	row_record_2 = row_record[2];
-// 	row_record_3 = row_record[3];
-// 	row_record_4 = row_record[4];
-// 	row_record_5 = row_record[5];
-// end
 
 always @(*) begin
     map_col0 = {map[66], map[60], map[54], map[48], map[42], map[36], map[30], map[24], map[18], map[12], map[6], map[0]};
@@ -302,8 +285,7 @@ end
 
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) begin
-		map <= 9'b0;
-		// total_score <= 'b0;
+		map <= 89'b0;
     end
 	else begin
 		if (current_state == UPDATE_MAP) begin
@@ -751,7 +733,7 @@ always @(posedge clk or negedge rst_n) begin
 			score_valid <= 1'b1;
 			fail <= |(map[90:72]);
 
-			if( (|map[90:72] == 1) || tetris_cnt == 'd16) begin
+			if( (|map[90:72] == 1) || tetro_index == 'd15) begin
 				tetris_valid <= 1'b1;
 				tetris <= map[71:0];
 			end
