@@ -6,7 +6,7 @@
 //
 //   ICLAB 2024 Fall
 //   Lab01 Exercise     : Snack Shopping Calculator
-//   Author               : Yu-Hsiang Wang
+//   Author             : Hsiao-Min Li
 //
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
