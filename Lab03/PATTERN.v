@@ -1,11 +1,11 @@
 /**************************************************************************/
 // Copyright (c) 2024, OASIS Lab
-// MODULE: PATTERN
-// FILE NAME: PATTERN.v
+// MODULE: TETRIS
+// FILE NAME: TETRIS.v
 // VERSRION: 1.0
 // DATE: August 15, 2024
-// AUTHOR: Yu-Hsuan Hsu, NYCU IEE
-// DESCRIPTION: ICLAB2024FALL / LAB3 / PATTERN
+// AUTHOR: Hsiao-Min Li, NYCU IOE
+// DESCRIPTION: ICLAB2024FALL / LAB3 / TETRIS
 // MODIFICATION HISTORY:
 // Date                 Description
 // 

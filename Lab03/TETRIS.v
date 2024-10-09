@@ -4,7 +4,7 @@
 // FILE NAME: TETRIS.v
 // VERSRION: 1.0
 // DATE: August 15, 2024
-// AUTHOR: Yu-Hsuan Hsu, NYCU IEE
+// AUTHOR: Hsiao-Min Li, NYCU IOE
 // DESCRIPTION: ICLAB2024FALL / LAB3 / TETRIS
 // MODIFICATION HISTORY:
 // Date                 Description
