@@ -6,7 +6,7 @@
 //
 //   ICLAB 2023 Fall
 //   Lab04 Exercise		: Convolution Neural Network 
-//   Author     		: Yu-Chi Lin (a6121461214.st12@nycu.edu.tw)
+//   Author     		: Hsiao-Min Li (siaomin.cs13@nycu.edu.tw)
 //
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
